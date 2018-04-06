@@ -1,5 +1,3 @@
-import vueFullcalendar from './fullCalendar'
+import { vueFullcalendar as fc } from './fullCalendar';
 
-const fc = vueFullcalendar;
-
-module.exports = fc;
+export default fc;

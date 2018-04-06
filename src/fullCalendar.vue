@@ -49,8 +49,9 @@
       <div class="weeks">
         <strong
           v-for="dayIndex in 7"
+          :key="dayIndex"
           class="week"
-        >{{ (dayIndex - 1) | localeWeekDay(firstDay, locale) }}</strong>
+        >{{ dayIndex | localeWeekDay(firstDay) }}</strong>
       </div>
       <div
         ref="dates"
@@ -66,7 +67,7 @@
               :class="{'today' : day.isToday, 'not-cur-month' : !day.isCurMonth}"
               class="day-cell"
             >
-              <p class="day-number">{{ day.monthDay }}</p>
+              <p class="day-number">{{ dayNumber(day) }}</p>
             </div>
           </div>
         </div>
@@ -122,7 +123,7 @@
           class="more-events"
         >
           <div class="more-header">
-            <span class="title">{{ moreTitle(selectDay.date) }}</span>
+            <span class="title">{{ moreTitle(selectedDay.date) }}</span>
             <span
               class="close"
               @click.stop="showMore = false"
@@ -131,7 +132,7 @@
           <div class="more-body">
             <ul class="body-list">
               <li
-                v-for="event in selectDay.events"
+                v-for="event in selectedDay.events"
                 v-show="event.isShow"
                 class="body-item"
                 @click="eventClick(event, $event)"
@@ -148,24 +149,34 @@
     </div>
   </div>
 </template>
-<script type="text/babel">
-// import langSets from './dataMap/langSets'
-import dateFunc from './components/dateFunc';
-import moment from 'moment';
+<script>
+import {
+  format,
+  startOfMonth,
+  addWeeks,
+  addDays,
+  subDays,
+  isToday,
+  isSameMonth,
+  isWithinRange,
+  getDay,
+  getDate,
+} from 'date-fns';
 import EventCard from './components/eventCard.vue';
+import FcHeader from './components/header.vue';
 
 export default {
   components: {
-    'event-card': EventCard,
-    'fc-header': require('./components/header'),
+    EventCard,
+    FcHeader,
   },
 
   filters: {
     localeWeekDay(weekday, firstDay, locale) {
-      const localMoment = moment().locale(locale);
-      return localMoment.localeData().weekdaysShort()[
-        (weekday + parseInt(firstDay, 10)) % 7
-      ];
+      console.log(weekday);
+      return format(new Date(2018, 0, weekday + 6 + firstDay), 'ddd', {
+        locale: 'de',
+      });
     },
   },
 
@@ -191,16 +202,15 @@ export default {
 
   data() {
     return {
-      currentMonth: moment().startOf('month'),
+      currentMonth: startOfMonth(Date()),
       isLismit: true,
       eventLimit: 3,
       showMore: false,
       morePos: {
         top: 0,
-
         left: 0,
       },
-      selectDay: {},
+      selectedDay: {},
       activeEvent: {},
     };
   },
@@ -216,30 +226,41 @@ export default {
   },
 
   methods: {
-    emitChangeMonth(firstDayOfMonth) {
-      this.currentMonth = firstDayOfMonth;
+    getMonthViewerStartDate(date) {
+      const firstDayOfMonth = startOfMonth(date);
+      let start = subDays(date, getDay(firstDayOfMonth));
+      if (getDay(firstDayOfMonth) < this.firstDay) {
+        start = subDays(start, 7);
+      }
+      start = addDays(start, this.firstDay);
+      return start;
+    },
+
+    getMonthViewerEndDate(date) {
+      return addWeeks(this.getMonthViewerStartDate(date), 6);
+    },
+
+    dayNumber(day) {
+      return getDate(day.date);
+    },
+
+    emitChangeMonth(month) {
+      this.currentMonth = startOfMonth(month);
       this.activeEvent = null;
-
-      const start = dateFunc.getMonthViewStartDate(
-        firstDayOfMonth,
-        this.firstDay
-      );
-      const end = dateFunc.getMonthViewEndDate(firstDayOfMonth, this.firstDay);
-
-      this.$emit('changeMonth', start, end, firstDayOfMonth);
+      const start = this.getMonthViewerStartDate(month);
+      const end = this.getMonthViewerEndDate(month);
+      this.$emit('changeMonth', start, end, month);
     },
 
     moreTitle(date) {
       if (!date) return '';
-      return moment(date).format('ll');
+      return format(date);
     },
 
     getCalendar() {
       // calculate 2d-array of each month
-      const monthViewStartDate = dateFunc.getMonthViewStartDate(
-        this.currentMonth,
-        this.firstDay
-      );
+      let date = startOfMonth(this.currentMonth);
+
       const calendar = [];
 
       for (let perWeek = 0; perWeek < 6; perWeek += 1) {
@@ -247,15 +268,15 @@ export default {
 
         for (let perDay = 0; perDay < 7; perDay += 1) {
           week.push({
-            monthDay: monthViewStartDate.date(),
-            isToday: monthViewStartDate.isSame(moment(), 'day'),
-            isCurMonth: monthViewStartDate.isSame(this.currentMonth, 'month'),
+            date,
+            monthDay: date,
+            isToday: isToday(date),
+            isCurMonth: isSameMonth(date, this.currentMonth),
             weekDay: perDay,
-            date: moment(monthViewStartDate),
-            events: this.slotEvents(monthViewStartDate),
+            events: this.slotEvents(date),
           });
 
-          monthViewStartDate.add(1, 'day');
+          date = addDays(date, 1);
         }
         calendar.push(week);
       }
@@ -263,15 +284,14 @@ export default {
       return calendar;
     },
 
-    slotEvents(date) {
+    slotEvents(day) {
       // find all events start from this date
-      const thisDayEvents = this.events.filter(day => {
-        const st = moment(day.start);
-        const ed = moment(day.end ? day.end : st);
+      const thisDayEvents = this.events.filter(event => {
+        const start = Date(event.start);
+        const end = Date(event.end);
 
-        return date.isBetween(st, ed, null, '[]');
+        return isWithinRange(Date(day), start, end);
       });
-
       // sort by duration
       thisDayEvents.sort((a, b) => {
         if (!a.cellIndex) return 1;
@@ -289,8 +309,8 @@ export default {
         thisDayEvents.splice(i, 0, {
           title: 'holder',
           cellIndex: i + 1,
-          start: date.format(),
-          end: date.format(),
+          start: format(day),
+          end: format(day),
           isShow: false,
         });
       }
@@ -299,7 +319,7 @@ export default {
     },
 
     selectThisDay(day, jsEvent) {
-      this.selectDay = day;
+      this.selectedDay = day;
       this.showMore = true;
       this.morePos = this.computePos(jsEvent.target);
       this.morePos.top -= 100;

@@ -7,7 +7,7 @@
       :events="fcEvents"
       :first-day="1"
       class="test-fc"
-      locale="fr"
+      locale="en"
       @changeMonth="changeMonth"
       @eventClick="eventClick"
       @dayClick="dayClick"
@@ -48,6 +48,9 @@
   </div>
 </template>
 <script>
+import { format } from 'date-fns';
+import FullCalendar from 'src/fullCalendar.vue';
+
 const demoEvents = [
   {
     title: 'Sunny 725-727',
@@ -56,43 +59,43 @@ const demoEvents = [
     cssClass: 'family',
   },
   {
-    title: 'Lunfel 726-727',
+    title: 'Random Event',
     start: '2018-02-26',
     end: '2018-02-27',
     cssClass: ['home', 'work'],
   },
   {
-    title: 'Lunfel 2/27-2/28',
+    title: 'Random Event',
     start: '2018-02-27',
     end: '2018-02-28',
   },
   {
-    title: 'Lunfel 2/27-2/28',
+    title: 'Random Event',
     start: '2018-02-27',
     end: '2018-02-28',
   },
   {
-    title: 'Lunfel 2/27-2/28',
+    title: 'Random Event',
     start: '2018-02-27',
     end: '2018-02-28',
   },
   {
-    title: 'Lunfel 2/26-3/05',
+    title: 'Random Event',
     start: '2018-02-26',
     end: '2018-03-05',
   },
   {
-    title: 'Lunfel 1/27-1/28',
+    title: 'Random Event',
     start: '2018-01-27',
-    end: '2018-01-28',
+    end: '2019-01-28',
   },
   {
-    title: 'Lunfel 1/27-2/2',
+    title: 'Random Event',
     start: '2018-01-27',
     end: '2018-02-02',
   },
   {
-    title: 'Lunfel 3/27-3/28',
+    title: 'Random Event',
     start: '2018-03-27',
     end: '2018-03-28',
   },
@@ -100,7 +103,7 @@ const demoEvents = [
 
 export default {
   components: {
-    'full-calendar': require('src/fullCalendar'),
+    FullCalendar,
   },
   data() {
     return {
@@ -110,12 +113,7 @@ export default {
   },
   methods: {
     changeMonth(start, end, current) {
-      console.log(
-        'changeMonth',
-        start.format(),
-        end.format(),
-        current.format()
-      );
+      console.log('changeMonth', format(start), format(end), format(current));
     },
     eventClick(event, jsEvent, pos) {
       console.log('eventClick', event, jsEvent, pos);

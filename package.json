@@ -3,23 +3,21 @@
   "version": "1.0.9",
   "author": "Sunny Wang",
   "license": "MIT",
-  "description": "pure vue-based fullcalendar, no jquery moment required",
+  "description": "pure vue-based fullcalendar, no jQuery, no moment",
   "main": "dist/vue-fullcalendar.js",
-  "files": [
-    "dist/vue-fullcalendar.js",
-    "dist/vue-fullcalendar.min.js",
-    "src"
-  ],
+  "files": ["dist/vue-fullcalendar.js", "dist/vue-fullcalendar.min.js", "src"],
   "scripts": {
     "demo": "webpack",
     "dev": "webpack-dev-server --output-public-path=/static/ --inline --hot",
-    "build": "webpack --progress --hide-modules --config webpack.build.js && webpack --progress --hide-modules --config webpack.build.min.js -p"
+    "build":
+      "webpack --progress --hide-modules --config webpack.build.js && webpack --progress --hide-modules --config webpack.build.min.js -p"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Wanderxx/vue-fullcalendar.git"
   },
   "dependencies": {
+    "date-fns": "^1.29.0",
     "es6-promise": "^4.0.5",
     "vue": "^2.1.8",
     "vue-fullcalendar": "^1.0.5"
@@ -46,7 +44,6 @@
     "exports-loader": "^0.6.3",
     "file-loader": "^0.8.5",
     "imports-loader": "^0.6.5",
-    "moment": "^2.17.1",
     "node-libs-browser": "^0.5.3",
     "node-sass": "^3.4.2",
     "prettier": "^1.11.1",
@@ -62,9 +59,6 @@
     "webpack": "^1.12.8",
     "webpack-dev-server": "^1.12.0"
   },
-  "keywords": [
-    "vue",
-    "fullcalendar"
-  ],
+  "keywords": ["vue", "fullcalendar"],
   "homepage": "https://github.com/Wanderxx/vue-fullcalendar#readme"
 }

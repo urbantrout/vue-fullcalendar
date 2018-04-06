@@ -10,8 +10,6 @@
         :goPrev="goPrev"
         :goNext="goNext"
         :currentMonth="currentMonth"
-        :rightArrow="rightArrow"
-        :leftArrow="leftArrow"
         name="header-center"
       />
     </div>
@@ -21,14 +19,14 @@
     </div>
   </div>
 </template>
-<script type="text/babel">
-import dateFunc from './dateFunc';
-import moment from 'moment';
+
+<script>
+import { format, addMonths, subMonths, startOfMonth } from 'date-fns';
 
 export default {
   props: {
     currentMonth: {
-      type: Object,
+      type: Date,
       default: undefined,
     },
     titleFormat: {
@@ -36,7 +34,7 @@ export default {
       default: undefined,
     },
     firstDay: {
-      type: Number | String,
+      type: Number,
       default: undefined,
     },
     monthNames: {
@@ -49,36 +47,27 @@ export default {
     },
   },
 
-  data() {
-    return {
-      leftArrow: '<',
-      rightArrow: '>',
-    };
-  },
-
   computed: {
     title() {
       if (!this.currentMonth) return '';
-      return this.currentMonth.locale(this.locale).format('MMMM YYYY');
+      return format(this.currentMonth, 'MMMM YYYY');
     },
   },
 
   methods: {
     goPrev() {
-      const newMonth = moment(this.currentMonth)
-        .subtract(1, 'months')
-        .startOf('month');
+      const newMonth = subMonths(startOfMonth(this.currentMonth), 1);
+
       this.$emit('change', newMonth);
     },
     goNext() {
-      const newMonth = moment(this.currentMonth)
-        .add(1, 'months')
-        .startOf('month');
+      const newMonth = addMonths(startOfMonth(this.currentMonth), 1);
       this.$emit('change', newMonth);
     },
   },
 };
 </script>
+
 <style lang="scss">
 .full-calendar-header {
   display: flex;

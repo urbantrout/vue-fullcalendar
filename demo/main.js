@@ -1,21 +1,12 @@
-// main entry file
-// var Vue = require('vue')
-import Vue from 'vue'
-import App from './app'
-// new Vue({
-//   el : '#app',
-//   components : {
-//     'app' : require('./app')
-//   }
-// })
+import Vue from 'vue';
+import App from './app';
 
+// eslint-disable-next-line no-new
 new Vue({
-    el: '#app',
-    render: h => h(App),
-    template: '<App/>',
-    components: {
-        App
-    }
+  el: '#app',
+  components: {
+    App,
+  },
+  render: h => h(App),
+  template: '<App/>',
 });
-
-

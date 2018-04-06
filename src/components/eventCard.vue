@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import moment from 'moment';
+import { isSameDay, getDay } from 'date-fns';
 
 export default {
   props: {
@@ -22,12 +22,14 @@ export default {
       type: Object,
       required: true,
     },
+
     date: {
-      type: Object,
+      type: Date,
       required: true,
     },
+
     firstDay: {
-      type: Number | String,
+      type: Number,
       required: true,
     },
   },
@@ -42,11 +44,11 @@ export default {
         cssClasses = Array.from(cssClasses);
       }
 
-      if (this.start.isSame(this.date, 'day')) {
+      if (isSameDay(this.start, this.day)) {
         cssClasses.push('is-start');
       }
 
-      if (this.end.isSame(this.date, 'day')) {
+      if (isSameDay(this.end, this.day)) {
         cssClasses.push('is-end');
       }
 
@@ -56,16 +58,19 @@ export default {
 
       return cssClasses.join(' ');
     },
+
     showTitle() {
       return (
-        this.date.day() == this.firstDay || this.start.isSame(this.date, 'day')
+        getDay(this.date) === this.firstDay || isSameDay(this.start, this.day)
       );
     },
+
     start() {
-      return moment(this.event.start);
+      return this.event.start;
     },
+
     end() {
-      return moment(this.event.end);
+      return this.event.end;
     },
   },
 };
